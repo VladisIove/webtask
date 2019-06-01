@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}
+	Detail post
+{% endblock %}
+
+{% block search %}
+<form class="form-inline my-2 my-lg-0" action="{% url 'post:search' %}" method="POST">
+	{% csrf_token %}
+	{{ search.body |as_crispy_field }}
+
+<input type="submit" class='btn btn-success ml-1' value="Search"></div>
+</form>
+{% endblock %}
+
+{% block content %}
+
+<div class="row m-2">
+	<div class="col-6">
+		<img src="{{ MEDIA_ROOT }}{{ post.image.url }}" alt="" class ='img-thumbnail'>
+	</div>
+	<div class="col-6">
+
+		<h1>{{ post.title }}</h1>
+		<p>{{post.body}}</p>
+		<p>{{count}}</p>
+		<form action="{% url 'post:like' post.id %}" method="post">
+			<div class="row">
+				<div class="col"> 
+					<input type="submit" class='btn btn-success' value="Like"></div>
+				</div>
+				{% csrf_token %}
+			</form>
+
+		<form action="{% url 'post:add_comment_to_post' post.id %}" method="post">
+			<div class="row">
+	{% csrf_token %}
+	{{ comment_form.body |as_crispy_field }}
+				{% csrf_token %}
+				<input type="submit" class='btn btn-success ml-1' value="Add comment">
+		</form>
+		<hr>
+</div>
+
+		{% for comment in page_object.object_list  %}
+			<div class="row">
+				<div class="col">
+					<p class="h4">{{comment.author.username}}</p>
+					<p>{{comment.text}}</p>
+				</div>
+			</div>
+		{% endfor %}
+		<nav aria-label="..." class='d-flex justify-content-center m-2'>
+      <ul class="pagination">
+        <li class="page-item {% if  not prev_url%} disabled {% endif %}">
+          <a class="page-link" href="{{prev_url}}" tabindex="-1">Previous</a>
+        </li>
+        {% for n in page_object.paginator.page_range  %}
+        {% if page_object.number == n %} 
+        <li class="page-item active">
+          <a class="page-link" href="?page={{n}}">{{ n }}</a>
+        </li>
+        {% elif n > page_object.number|add:-3 and n < page_object.number|add:3 %}
+        <li class="page-item ">
+          <a class="page-link" href="?page={{n}}">{{ n }}</a>
+        </li>
+
+        {% endif %}
+
+        {% endfor %}
+        <li class="page-item {% if  not next_url%} disabled {% endif %}">
+          <a class="page-link" href="{{next_url}}" tabindex="-1">Next</a>
+        </li>
+
+      </ul>
+    </nav>
+{% endblock content %}

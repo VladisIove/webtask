@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}
+	List posts
+{% endblock %}
+{% block search %}
+<form class="form-inline my-2 my-lg-0" action="{% url 'post:search' %}" method="POST">
+	{% csrf_token %}
+{{ search.body |as_crispy_field}}
+
+<input type="submit" class='btn btn-success ml-1' value="Search"></div>
+</form>
+{% endblock %}
+
+{% block content %}
+	<h1 class="h2 text-center">{% if category %}{{ category.name }} - Posts {% else %} Posts {% endif %}</h1>
+	<div class="row">
+		<div class="col-2 offset-1">
+			<ul class="nav flex-column">
+				<li {% if not category %}class="selected"{% endif %}>
+					<p class="h4"><a href="{% url 'post:post_list' %}">All</a></p>
+				</li>
+				{% for c in categories %}
+				<li {% if category.slug == c.slug %}class="selected"{% endif %}>
+				<p class="h4"><a href="{{ c.get_absolute_url }}">{{ c.name }}</a></p>
+
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		<div class="col-9">
+			<div class="row">
+			{% for post in  page_object.object_list %}
+
+				<div class="card col-3 m-1" style="width: 18rem;">
+					<img src="{{ post.image.url }}" class="card-img-top" alt="...">
+					<div class="card-body">
+						<h5 class="card-title">{{post.title}}</h5>
+						<p class="card-text">{{post.body}}</p>
+
+						<p class="card-text">{{post.likes}}</p>
+				
+								<form action="{% url 'post:like_post_list' post.id %}" method="post">
+			<div class="row">
+				<div class="col"> 
+					<input type="submit" class='btn btn-success' value="Like"></div>
+				</div>
+				{% csrf_token %}
+			</form>
+						<a href="{{ post.get_absolute_url }}" class="btn btn-primary">Detail</a>
+					</div>
+				</div>
+			{% endfor %}
+			</div>
+		</div>
+	</div>
+	<nav aria-label="..." class='d-flex justify-content-center m-2'>
+      <ul class="pagination">
+        <li class="page-item {% if  not prev_url%} disabled {% endif %}">
+          <a class="page-link" href="{{prev_url}}" tabindex="-1">Previous</a>
+        </li>
+        {% for n in page_object.paginator.page_range  %}
+        {% if page_object.number == n %} 
+        <li class="page-item active">
+          <a class="page-link" href="?page={{n}}">{{ n }}</a>
+        </li>
+        {% elif n > page_object.number|add:-3 and n < page_object.number|add:3 %}
+        <li class="page-item ">
+          <a class="page-link" href="?page={{n}}">{{ n }}</a>
+        </li>
+
+        {% endif %}
+
+        {% endfor %}
+        <li class="page-item {% if  not next_url%} disabled {% endif %}">
+          <a class="page-link" href="{{next_url}}" tabindex="-1">Next</a>
+        </li>
+
+      </ul>
+    </nav>
+{% endblock %}
